@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Установка Heroku на UserLAnd</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap');
+
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --border: #2a2a2a;
+    --accent: #00ff88;
+    --accent-dim: #00ff8822;
+    --text: #e8e8e8;
+    --muted: #666;
+    --code-bg: #1a1a1a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  .container {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 60px 24px 100px;
+  }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 32px;
+    margin-bottom: 48px;
+  }
+
+  .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: #fff;
+  }
+
+  .notes {
+    background: var(--accent-dim);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    padding: 20px 24px;
+    margin-bottom: 48px;
+  }
+
+  .notes-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .notes ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .notes li {
+    font-size: 14px;
+    color: #ccc;
+    padding-left: 16px;
+    position: relative;
+  }
+
+  .notes li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+  }
+
+  .notes a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .distro {
+    margin-bottom: 48px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .distro-header {
+    background: var(--surface);
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .distro-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+  }
+
+  .distro-body {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .block-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .code-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .code-lang {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+
+  .copy-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    background: none;
+    border: 1px solid var(--accent);
+    border-radius: 3px;
+    padding: 3px 8px;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    transition: background 0.15s;
+  }
+
+  .copy-btn:hover {
+    background: var(--accent-dim);
+  }
+
+  .copy-btn.copied {
+    color: #fff;
+    border-color: #fff;
+  }
+
+  pre {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    color: #d4d4d4;
+    padding: 16px;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 0 24px;
+  }
+
+  footer {
+    text-align: center;
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 60px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="label">UserLAnd / Linux</div>
+    <h1>Установка Heroku</h1>
+  </header>
+
+  <div class="notes">
+    <div class="notes-title">Заметки</div>
+    <ul>
+      <li>Если появились иные ошибки — <a href="https://t.me/heroku_talks">@heroku_talks</a></li>
+      <li>Если UserLand зависает на «Проверка файлов...» — перезагрузи телефон</li>
+      <li>Повторный запуск используй после первой установки</li>
+      <li>Иногда терминал покажет пустую строку <code style="font-family:JetBrains Mono,monospace;font-size:12px;color:var(--accent)">userland@localhost#</code> — просто продублируй команду ещё раз</li>
+    </ul>
+  </div>
+
+  <!-- ARCH -->
+  <div class="distro">
+    <div class="distro-header">
+      <div class="distro-name">Arch Linux UserLand</div>
+    </div>
+    <div class="distro-body">
+      <div>
+        <div class="block-label">Установка</div>
+        <div class="code-block">
+          <div class="code-top">
+            <span class="code-lang">bash</span>
+            <button class="copy-btn" onclick="copyCode(this)">копировать</button>
+          </div>
+          <pre>su root
+pacman -Syu python python-pip git gcc glibc --noconfirm
+python3 -m venv venv && source venv/bin/activate
+git clone https://github.com/coddrago/Heroku && cd Heroku && pip install aiohttp==3.9.5 && pip install aiogram && pip install -r requirements.txt && python3 -m heroku --no-web</pre>
+        </div>
+      </div>
+      <hr class="divider">
+      <div>
+        <div class="block-label">Повторный запуск</div>
+        <div class="code-block">
+          <div class="code-top">
+            <span class="code-lang">bash</span>
+            <button class="copy-btn" onclick="copyCode(this)">копировать</button>
+          </div>
+          <pre>su root && cd Heroku && source venv/bin/activate && python3 -m heroku --no-web</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UBUNTU -->
+  <div class="distro">
+    <div class="distro-header">
+      <div class="distro-name">Ubuntu UserLand</div>
+    </div>
+    <div class="distro-body">
+      <div>
+        <div class="block-label">Установка</div>
+        <div class="code-block">
+          <div class="code-top">
+            <span class="code-lang">bash</span>
+            <button class="copy-btn" onclick="copyCode(this)">копировать</button>
+          </div>
+          <pre>su root
+apt install python3.14-venv -y
+python3 -m venv venv && source venv/bin/activate
+apt update && apt install git -y && apt install python3-pip -y && git clone https://github.com/coddrago/Heroku && cd Heroku && pip install -r requirements.txt && python3 -m heroku --no-web</pre>
+        </div>
+      </div>
+      <hr class="divider">
+      <div>
+        <div class="block-label">Повторный запуск</div>
+        <div class="code-block">
+          <div class="code-top">
+            <span class="code-lang">bash</span>
+            <button class="copy-btn" onclick="copyCode(this)">копировать</button>
+          </div>
+          <pre>su root && cd Heroku && source venv/bin/activate && python3 -m heroku --no-web</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEBIAN -->
+  <div class="distro">
+    <div class="distro-header">
+      <div class="distro-name">Debian UserLand</div>
+    </div>
+    <div class="distro-body">
+      <div>
+        <div class="block-label">Установка</div>
+        <div class="code-block">
+          <div class="code-top">
+            <span class="code-lang">bash</span>
+            <button class="copy-btn" onclick="copyCode(this)">копировать</button>
+          </div>
+          <pre>su root
+apt-get update --fix-missing
+apt-get install python3 python3-venv python3-pip git -y --fix-missing
+python3 -m venv venv && source venv/bin/activate
+git clone https://github.com/coddrago/Heroku && cd Heroku && pip install -r requirements.txt && python3 -m heroku --no-web</pre>
+        </div>
+      </div>
+      <hr class="divider">
+      <div>
+        <div class="block-label">Повторный запуск</div>
+        <div class="code-block">
+          <div class="code-top">
+            <span class="code-lang">bash</span>
+            <button class="copy-btn" onclick="copyCode(this)">копировать</button>
+          </div>
+          <pre>su root && cd Heroku && source venv/bin/activate && python3 -m heroku --no-web</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KALI -->
+  <div class="distro">
+    <div class="distro-header">
+      <div class="distro-name">Kali Linux UserLand</div>
+    </div>
+    <div class="distro-body">
+      <div>
+        <div class="block-label">Установка</div>
+        <div class="code-block">
+          <div class="code-top">
+            <span class="code-lang">bash</span>
+            <button class="copy-btn" onclick="copyCode(this)">копировать</button>
+          </div>
+          <pre>su root
+apt-get update --fix-missing
+apt-get install python3 python3-venv python3-pip git -y --fix-missing
+python3 -m venv venv && source venv/bin/activate
+git clone https://github.com/coddrago/Heroku && cd Heroku && pip install -r requirements.txt && python3 -m heroku --no-web</pre>
+        </div>
+      </div>
+      <hr class="divider">
+      <div>
+        <div class="block-label">Повторный запуск</div>
+        <div class="code-block">
+          <div class="code-top">
+            <span class="code-lang">bash</span>
+            <button class="copy-btn" onclick="copyCode(this)">копировать</button>
+          </div>
+          <pre>su root && cd Heroku && source venv/bin/activate && python3 -m heroku --no-web</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALPINE -->
+  <div class="distro">
+    <div class="distro-header">
+      <div class="distro-name">Alpine UserLand</div>
+    </div>
+    <div class="distro-body">
+      <div>
+        <div class="block-label">Установка</div>
+        <div class="code-block">
+          <div class="code-top">
+            <span class="code-lang">bash</span>
+            <button class="copy-btn" onclick="copyCode(this)">копировать</button>
+          </div>
+          <pre>su root
+apk add python3 py3-pip git
+python3 -m venv venv && source venv/bin/activate
+git clone https://github.com/coddrago/Heroku && cd Heroku && pip install -r requirements.txt && python3 -m heroku --no-web</pre>
+        </div>
+      </div>
+      <hr class="divider">
+      <div>
+        <div class="block-label">Повторный запуск</div>
+        <div class="code-block">
+          <div class="code-top">
+            <span class="code-lang">bash</span>
+            <button class="copy-btn" onclick="copyCode(this)">копировать</button>
+          </div>
+          <pre>cd /home/userland/Heroku && source /home/userland/venv/bin/activate && pip install gitpython aiohttp aiogram && pip install -r requirements.txt && python3 -m heroku --no-web</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>heroku-userland guide</footer>
+
+</div>
+
+<script>
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    navigator.clipboard.writeText(pre.textContent.trim()).then(() => {
+      btn.textContent = 'скопировано!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'копировать';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+</script>
+</body>
+</html>
